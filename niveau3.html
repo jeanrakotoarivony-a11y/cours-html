@@ -1,0 +1,637 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Casser le Code !</title>
+    <style>
+        body {
+            font-family: 'Arial Black', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            font-weight: bold;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            max-width: 800px;
+            width: 100%;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .title {
+            font-size: 4em;
+            color: #2d5016;
+            text-shadow: 3px 3px 6px rgba(0,0,0,0.5);
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 20px;
+            font-weight: 900;
+        }
+
+        .lock {
+            width: 80px;
+            height: 80px;
+            background: #ffd700;
+            border-radius: 15px;
+            border: 4px solid #333;
+            position: relative;
+            display: inline-block;
+        }
+
+        .lock::before {
+            content: '';
+            position: absolute;
+            top: -20px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 40px;
+            height: 40px;
+            border: 6px solid #333;
+            border-bottom: none;
+            border-radius: 40px 40px 0 0;
+        }
+
+        .lock::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 15px;
+            height: 20px;
+            background: #333;
+            border-radius: 0 0 10px 10px;
+        }
+
+        .clues {
+            margin: 30px 0;
+            text-align: left;
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 15px;
+            border-left: 5px solid #007bff;
+        }
+
+        .clues h3 {
+            font-size: 1.8em;
+            font-weight: 900;
+        }
+
+        .clue {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px;
+            margin: 15px 0;
+            border-radius: 10px;
+            font-size: 1.6em;
+            font-weight: 900;
+        }
+
+        .clue-code {
+            display: flex;
+            gap: 8px;
+        }
+
+        .clue-digit {
+            width: 50px;
+            height: 50px;
+            background: white;
+            border: 3px solid #333;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5em;
+            font-weight: 900;
+            color: #333;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+
+        .clue-1 { background: #ffebee; color: #c62828; }
+        .clue-2 { background: #fff3e0; color: #ef6c00; }
+        .clue-3 { background: #e8f5e8; color: #2e7d32; }
+        .clue-4 { background: #e1f5fe; color: #0277bd; }
+        .clue-5 { background: #f3e5f5; color: #7b1fa2; }
+
+        .code-input {
+            margin: 30px 0;
+        }
+
+        .code-input h3 {
+            font-size: 1.8em;
+            font-weight: 900;
+        }
+
+        .code-digits {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .digit-input {
+            width: 80px;
+            height: 80px;
+            font-size: 2.5em;
+            text-align: center;
+            border: 4px solid #ddd;
+            border-radius: 15px;
+            background: white;
+            transition: all 0.3s ease;
+            font-weight: 900;
+        }
+
+        .digit-input:focus {
+            border-color: #007bff;
+            box-shadow: 0 0 10px rgba(0,123,255,0.3);
+            outline: none;
+        }
+
+        .digit-input.wrong {
+            border-color: #ff4757 !important;
+            background: #ff6b6b !important;
+            color: white !important;
+            animation: vibrate 0.6s ease-in-out;
+        }
+
+        .submit-btn {
+            background: linear-gradient(45deg, #ff6b6b, #ee5a24);
+            color: white;
+            border: none;
+            padding: 20px 50px;
+            font-size: 1.8em;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin: 20px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            font-weight: 900;
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.3);
+        }
+
+        .submit-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .attempts {
+            font-size: 1.8em;
+            margin: 20px 0;
+            padding: 20px;
+            border-radius: 15px;
+            background: #fff3cd;
+            border: 3px solid #ffc107;
+            font-weight: 900;
+        }
+
+        .success {
+            background: linear-gradient(45deg, #ffd700, #ffed4e, #ffd700);
+            color: #333;
+            padding: 40px;
+            border-radius: 20px;
+            font-size: 2.5em;
+            font-weight: 900;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+            animation: celebrate 1s ease-in-out, goldShimmer 2s ease-in-out infinite;
+            border: 5px solid #ffa500;
+            box-shadow: 0 0 30px rgba(255, 215, 0, 0.8);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .success::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(45deg, transparent, rgba(255,255,255,0.3), transparent);
+            animation: goldSweep 3s ease-in-out infinite;
+        }
+
+        .gold-coin {
+            position: absolute;
+            width: 30px;
+            height: 30px;
+            background: radial-gradient(circle, #ffd700, #ffb347);
+            border-radius: 50%;
+            border: 2px solid #ffa500;
+            animation: coinFall 3s ease-out infinite;
+        }
+
+        .fireworks-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: linear-gradient(135deg, #0c0c0c, #1a1a2e, #16213e);
+            z-index: 1000;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .firework {
+            position: absolute;
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+        }
+
+        .explosion-message {
+            position: relative;
+            z-index: 1001;
+            color: #ffd700;
+            font-size: 4em;
+            text-align: center;
+            text-shadow: 0 0 20px #ff6b6b, 0 0 40px #4ecdc4;
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        .reset-btn {
+            background: #28a745;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 1.2em;
+            margin-top: 20px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            transition: all 0.3s ease;
+        }
+
+        .reset-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.4);
+        }
+
+        .feedback {
+            margin: 15px 0;
+            padding: 20px;
+            border-radius: 15px;
+            font-weight: 900;
+            font-size: 1.5em;
+        }
+
+        .feedback.wrong {
+            background: #ffebee;
+            color: #c62828;
+            border: 2px solid #ef5350;
+            animation: shake 0.5s ease-in-out;
+        }
+
+        @keyframes celebrate {
+            0% { transform: scale(0.5); opacity: 0; }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        @keyframes goldShimmer {
+            0%, 100% { background: linear-gradient(45deg, #ffd700, #ffed4e, #ffd700); }
+            50% { background: linear-gradient(45deg, #ffed4e, #ffd700, #ffed4e); }
+        }
+
+        @keyframes goldSweep {
+            0% { transform: translateX(-100%) translateY(-100%) rotate(45deg); }
+            50% { transform: translateX(0%) translateY(0%) rotate(45deg); }
+            100% { transform: translateX(100%) translateY(100%) rotate(45deg); }
+        }
+
+        @keyframes coinFall {
+            0% { 
+                top: -50px; 
+                opacity: 1; 
+                transform: rotate(0deg) scale(1);
+            }
+            100% { 
+                top: 100%; 
+                opacity: 0; 
+                transform: rotate(360deg) scale(0.5);
+            }
+        }
+
+        @keyframes vibrate {
+            0%, 100% { transform: translateX(0); }
+            10%, 30%, 50%, 70%, 90% { transform: translateX(-10px); }
+            20%, 40%, 60%, 80% { transform: translateX(10px); }
+        }
+
+        @keyframes pulse {
+            0%, 100% { 
+                transform: scale(1);
+                text-shadow: 0 0 20px #ff6b6b, 0 0 40px #4ecdc4;
+            }
+            50% { 
+                transform: scale(1.05);
+                text-shadow: 0 0 30px #ffd700, 0 0 60px #6c5ce7;
+            }
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container" id="gameContainer">
+        <div class="title">
+            CASSER LE CODE !!
+            <div class="lock"></div>
+        </div>
+
+        <div class="clues">
+            <h3>🔍 Indices :</h3>
+            <div class="clue clue-1">
+                <span>Un chiffre correct, mauvaise place</span>
+                <div class="clue-code">
+                    <div class="clue-digit">9</div>
+                    <div class="clue-digit">2</div>
+                    <div class="clue-digit">8</div>
+                    <div class="clue-digit">5</div>
+                </div>
+            </div>
+            <div class="clue clue-2">
+                <span>Deux chiffres corrects, mauvaises places</span>
+                <div class="clue-code">
+                    <div class="clue-digit">1</div>
+                    <div class="clue-digit">9</div>
+                    <div class="clue-digit">3</div>
+                    <div class="clue-digit">7</div>
+                </div>
+            </div>
+            <div class="clue clue-3">
+                <span>Un chiffre correct, bonne place</span>
+                <div class="clue-code">
+                    <div class="clue-digit">5</div>
+                    <div class="clue-digit">2</div>
+                    <div class="clue-digit">0</div>
+                    <div class="clue-digit">1</div>
+                </div>
+            </div>
+            <div class="clue clue-4">
+                <span>Rien de correct</span>
+                <div class="clue-code">
+                    <div class="clue-digit">6</div>
+                    <div class="clue-digit">5</div>
+                    <div class="clue-digit">0</div>
+                    <div class="clue-digit">7</div>
+                </div>
+            </div>
+            <div class="clue clue-5">
+                <span>Deux chiffres corrects, mauvaises places</span>
+                <div class="clue-code">
+                    <div class="clue-digit">8</div>
+                    <div class="clue-digit">5</div>
+                    <div class="clue-digit">2</div>
+                    <div class="clue-digit">4</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="code-input">
+            <h3>🔢 Entrez le code à 4 chiffres :</h3>
+            <div class="code-digits">
+                <input type="number" class="digit-input" max="9" min="0" id="digit1">
+                <input type="number" class="digit-input" max="9" min="0" id="digit2">
+                <input type="number" class="digit-input" max="9" min="0" id="digit3">
+                <input type="number" class="digit-input" max="9" min="0" id="digit4">
+            </div>
+            <button class="submit-btn" onclick="checkCode()">VÉRIFIER LE CODE 🔓</button>
+        </div>
+
+        <div class="attempts" id="attemptsDisplay">
+            Tentatives restantes: <span id="remainingAttempts">3</span>/3
+        </div>
+
+        <div id="feedback"></div>
+    </div>
+
+    <script>
+        let attempts = 3;
+        let gameOver = false;
+        let isChecking = false;
+        const correctCode = "3841";
+        
+        // Auto-focus sur le champ suivant
+        document.querySelectorAll('.digit-input').forEach((input, index) => {
+            input.addEventListener('input', function() {
+                if (this.value.length === 1 && index < 3) {
+                    document.getElementById(`digit${index + 2}`).focus();
+                }
+                if (this.value.length > 1) {
+                    this.value = this.value.slice(0, 1);
+                }
+            });
+
+            input.addEventListener('keydown', function(e) {
+                if (e.key === 'Backspace' && this.value === '' && index > 0) {
+                    document.getElementById(`digit${index}`).focus();
+                }
+                // Vérifier le code quand on appuie sur Entrée
+                if (e.key === 'Enter' && !gameOver) {
+                    checkCode();
+                }
+            });
+        });
+
+        // Ajouter aussi l'événement sur le document pour capturer Entrée partout
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter' && !gameOver) {
+                checkCode();
+            }
+        });
+
+        function checkCode() {
+            // Empêcher les vérifications multiples
+            if (gameOver || attempts <= 0 || isChecking) {
+                return;
+            }
+            
+            isChecking = true;
+            
+            const digit1 = document.getElementById('digit1').value;
+            const digit2 = document.getElementById('digit2').value;
+            const digit3 = document.getElementById('digit3').value;
+            const digit4 = document.getElementById('digit4').value;
+            
+            const enteredCode = digit1 + digit2 + digit3 + digit4;
+            
+            if (enteredCode.length !== 4) {
+                showFeedback("Veuillez entrer tous les 4 chiffres !", "wrong");
+                isChecking = false;
+                return;
+            }
+            
+            if (enteredCode === correctCode) {
+                gameOver = true;
+                showSuccess();
+                return;
+            }
+            
+            // Code incorrect
+            attempts--;
+            document.getElementById('remainingAttempts').textContent = attempts;
+            
+            // Animation rouge et vibration pour les cases
+            shakeInputs();
+            
+            if (attempts <= 0) {
+                gameOver = true;
+                setTimeout(() => {
+                    createFireworks();
+                }, 800);
+            } else {
+                showFeedback(`Code incorrect ! Plus que ${attempts} tentative${attempts > 1 ? 's' : ''} !`, "wrong");
+                setTimeout(() => {
+                    isChecking = false;
+                }, 1000);
+            }
+        }
+
+        function shakeInputs() {
+            document.querySelectorAll('.digit-input').forEach(input => {
+                input.classList.add('wrong');
+                // Effacer le contenu après l'animation
+                setTimeout(() => {
+                    input.value = '';
+                }, 300);
+                setTimeout(() => {
+                    input.classList.remove('wrong');
+                    // Remettre le focus sur la première case
+                    document.getElementById('digit1').focus();
+                }, 600);
+            });
+        }
+
+        function showFeedback(message, type) {
+            const feedback = document.getElementById('feedback');
+            feedback.innerHTML = `<div class="feedback ${type}">${message}</div>`;
+        }
+
+        function showSuccess() {
+            const successHTML = `
+                <div class="success">
+                    🏆 FÉLICITATIONS ! 🏆<br>
+                    Vous avez cassé le code !<br>
+                    Bravo pour votre intelligence !
+                    <br><br>
+                    <button class="reset-btn" onclick="location.reload()">Rejouer</button>
+                </div>
+            `;
+            
+            document.getElementById('gameContainer').innerHTML = successHTML;
+            
+            // Créer des pièces d'or qui tombent
+            for (let i = 0; i < 20; i++) {
+                setTimeout(() => {
+                    createGoldCoin();
+                }, i * 200);
+            }
+        }
+
+        function createGoldCoin() {
+            const coin = document.createElement('div');
+            coin.className = 'gold-coin';
+            coin.style.left = Math.random() * 100 + '%';
+            coin.style.animationDelay = Math.random() * 2 + 's';
+            coin.style.animationDuration = (3 + Math.random() * 2) + 's';
+            
+            document.body.appendChild(coin);
+            
+            // Supprimer la pièce après l'animation
+            setTimeout(() => {
+                if (coin.parentNode) {
+                    coin.parentNode.removeChild(coin);
+                }
+            }, 6000);
+        }
+
+        function createFireworks() {
+            const container = document.createElement('div');
+            container.className = 'fireworks-container';
+            
+            // Message d'explosion
+            const message = document.createElement('div');
+            message.className = 'explosion-message';
+            message.innerHTML = `
+                💥 BOOM ! 💥<br>
+                <div style="font-size: 0.6em; margin-top: 30px;">
+                    Tentatives épuisées !<br>
+                    <button class="reset-btn" onclick="location.reload()">Recommencer</button>
+                </div>
+            `;
+            
+            container.appendChild(message);
+            document.body.appendChild(container);
+            
+            // Créer les feux d'artifice
+            const colors = ['#ff6b6b', '#4ecdc4', '#45b7d1', '#f9ca24', '#6c5ce7', '#a29bfe', '#fd79a8', '#00b894'];
+            
+            for (let i = 0; i < 50; i++) {
+                setTimeout(() => {
+                    createFirework(container, colors[Math.floor(Math.random() * colors.length)]);
+                }, i * 100);
+            }
+        }
+
+        function createFirework(container, color) {
+            const firework = document.createElement('div');
+            firework.className = 'firework';
+            firework.style.background = color;
+            firework.style.left = Math.random() * 100 + '%';
+            firework.style.top = Math.random() * 100 + '%';
+            firework.style.boxShadow = `0 0 20px ${color}`;
+            
+            container.appendChild(firework);
+            
+            // Animation d'explosion
+            let scale = 1;
+            let opacity = 1;
+            const animate = () => {
+                scale += 0.5;
+                opacity -= 0.05;
+                firework.style.transform = `scale(${scale})`;
+                firework.style.opacity = opacity;
+                
+                if (opacity > 0) {
+                    requestAnimationFrame(animate);
+                } else {
+                    firework.remove();
+                }
+            };
+            
+            requestAnimationFrame(animate);
+        }
+
+        // Focus automatique sur le premier champ au chargement
+        window.onload = function() {
+            document.getElementById('digit1').focus();
+        };
+    </script>
+</body>
+</html>
